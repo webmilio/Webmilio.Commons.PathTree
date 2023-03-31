@@ -60,7 +60,7 @@ public class Tests
     {
         var root = new Root<int>();
         root.Add("test.test", 1);
-        
+
         Assert.AreEqual(0, root.Get("test"));
         Assert.AreEqual(1, root.Get("test.test"));
     }
@@ -75,17 +75,20 @@ public class Tests
 
         var paths = new Dictionary<string, (int Actual, int Expected)>()
         {
-            { "root.weather.canada", (100, 0) },
-            { "root.weather.canada.quebec", (101, 101) }, // This destroys the canada node.
+            { "root.weather.canada",                        (100, 0)    },
+            { "root.weather.canada.quebec",                 (101, 101)  }, // This destroys the canada node.
 
-            { "root.weather.america.iowa", (500, 500) },
-            { "root.weather.america.california", (501, 501) },
-            { "root.weather.america.wisconsin", (502, 0) },
+            { "root.weather.america.iowa",                  (500, 500)  },
+            { "root.weather.america.california",            (501, 501)  },
+            { "root.weather.america.wisconsin",             (502, 0)    },
 
-            { "root.weather.america.wisconsin.somecity", (503, 503) } // This destroys the wisconsin node.
+            { "root.weather.america.wisconsin.somecity",    (503, 503)  } // This destroys the wisconsin node.
         };
 
-        foreach (var items in paths) root.Add(items.Key, items.Value.Actual);
+        foreach (var items in paths)
+        {
+            root.Add(items.Key, items.Value.Actual);
+        }
 
         foreach (var item in paths)
         {
@@ -104,18 +107,18 @@ public class Tests
 
         var paths = new Dictionary<string, (int Actual, int Expected)>()
         {
-            { "root.weather.canada", (100, 100) },
-            { "root.weather.canada.quebec", (101, 101) }, // This destroys the canada node.
+            { "root.weather.canada",                        (100, 100)  },
+            { "root.weather.canada.quebec",                 (101, 101)  }, // This destroys the canada node.
 
-            { "root.weather.canada.ontario.*", (150, 150) },
-            { "root.weather.canada.ontario.kingston", (0, 150) },
-            { "root.weather.canada.ontario.toronto", (0, 150) },
+            { "root.weather.canada.ontario.*",              (150, 150)  },
+            { "root.weather.canada.ontario.kingston",       (0, 150)    },
+            { "root.weather.canada.ontario.toronto",        (0, 150)    },
 
-            { "root.weather.america.iowa", (500, 500) },
-            { "root.weather.america.california", (501, 501) },
-            { "root.weather.america.wisconsin", (502, 502) },
+            { "root.weather.america.iowa",                  (500, 500)  },
+            { "root.weather.america.california",            (501, 501)  },
+            { "root.weather.america.wisconsin",             (502, 502)  },
 
-            { "root.weather.america.wisconsin.somecity", (503, 503) } // This destroys the wisconsin node.
+            { "root.weather.america.wisconsin.somecity",    (503, 503)  } // This destroys the wisconsin node.
         };
 
         foreach (var pair in paths)
