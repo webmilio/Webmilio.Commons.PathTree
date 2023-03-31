@@ -2,10 +2,10 @@
 
 public class Leaf<T> : Node<T>
 {
-    public Leaf(string path, string fullPath, T value, Branch<T> parent)
+    public Leaf(string segment, string path, T value, Branch<T> parent)
     {
+        Segment = segment;
         Path = path;
-        FullName = fullPath;
 
         Value = value;
         Parent = parent;
@@ -18,5 +18,5 @@ public class Leaf<T> : Node<T>
 
     public T Value { get; private set; }
 
-    public string Path { get; private set; }
+    public string Segment { get; private set; }
 }

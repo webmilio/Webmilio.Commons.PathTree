@@ -6,6 +6,6 @@ public abstract class Node<T>
 
     internal abstract T Get(string path, int pathIndex);
 
-    public Node<T> Parent { get; internal set; }
-    public string FullName { get; internal set; }
+    public Branch<T> Parent { get; internal set; }
+    public string Path { get; internal set; }
 }

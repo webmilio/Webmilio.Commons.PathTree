@@ -4,7 +4,7 @@ public class Root<T> : Branch<T>
 {
     public Root()
     {
-        FullName = "";
+        Path = "";
     }
 
     public void Add(string path, T value)

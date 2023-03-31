@@ -6,6 +6,11 @@ public class Branch<T> : Node<T>
 
     internal override T Get(string path, int index)
     {
+        if (index + 1 > path.Length)
+        {
+            return default;
+        }
+
         var nextIndex = path.IndexOf(Delimiter, index + 1);
 
         if (nextIndex < 0)
@@ -21,15 +26,18 @@ public class Branch<T> : Node<T>
         return default;
     }
 
-    protected (int Index, Branch<T> Branch) GetDeepestBranch(string path, int index)
+    protected (int Index, Node<T> Node) GetDeepestNode(string path, int index)
     {
         var nextIndex = path.IndexOf(Delimiter, index + 1);
 
-        if (nextIndex > 0 &&
-            children.TryGetValue(path[index..nextIndex], out var child) &&
-            child is Branch<T> b)
+        if (nextIndex > 0 && children.TryGetValue(path[index..nextIndex], out var child))
         {
-            return b.GetDeepestBranch(path, nextIndex);
+            if (child is Branch<T> b)
+            {
+                return b.GetDeepestNode(path, nextIndex);
+            }
+
+            return (index, child);
         }
 
         return (index, this);
@@ -44,30 +52,46 @@ public class Branch<T> : Node<T>
             nextIndex = path.Length;
         }
 
-        var subPath = path[index..nextIndex];
-        var deepestBranch = GetDeepestBranch(path, index);
+        var segment = path[index..nextIndex];
+        var deepestNode = GetDeepestNode(path, index);
 
-        if (deepestBranch.Branch == this)
+        Add:
+        if (deepestNode.Node == this)
         {
             if (nextIndex == path.Length) // We're making a leaf!
             {
-                children.Add(subPath, new Leaf<T>(subPath, path, value, this));
+                children.Add(segment, new Leaf<T>(segment, path, value, this));
             }
             else
             {
                 var branch = new Branch<T>()
                 {
-                    FullName = subPath,
+                    Path = segment,
                     Parent = this
                 };
 
-                children.Add(subPath, branch);
+                children.Add(segment, branch);
                 branch.Add(path, nextIndex + 1, value);
             }
         }
         else
         {
-            deepestBranch.Branch.Add(path, nextIndex + 1, value);
+            if (deepestNode.Node is Branch<T> b)
+            {
+                b.Add(path, nextIndex + 1, value);
+            }
+            else if (deepestNode.Node is Leaf<T>) // Since it's a Leaf<T>, we need remove it since Branches can't have values (should I add that?)
+            {
+                children.Remove(segment);
+                deepestNode.Node = this;
+
+                goto Add; // Refactor this.
+            }
         }
+    }
+
+    protected void Remove(string path)
+    {
+        children.Remove(path);
     }
 }
