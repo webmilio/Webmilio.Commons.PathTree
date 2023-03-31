@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Webmilio.Commons.PathTree\Webmilio.Commons.PathTree.csproj" />
+    <ProjectReference Include="..\Webmilio.PathTree\Webmilio.PathTree.csproj" />
   </ItemGroup>
 
 </Project>

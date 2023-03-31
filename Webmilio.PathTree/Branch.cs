@@ -8,7 +8,7 @@ public class Branch<T> : Node<T>
 
     public Branch() 
     {
-        Children = children.AsReadOnly();
+        Children = new ReadOnlyDictionary<string, Node<T>>(children);
     }
 
     public Branch(Branch<T> parent, string segment) : this()
