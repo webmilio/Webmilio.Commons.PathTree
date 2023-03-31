@@ -1,32 +1,38 @@
-﻿namespace Webmilio.Commons.PathTree;
+﻿using System.Collections.ObjectModel;
+
+namespace Webmilio.Commons.PathTree;
 
 public class Branch<T> : Node<T>
 {
     protected Dictionary<string, Node<T>> children = new(StringComparer.OrdinalIgnoreCase);
 
-    internal override T Get(string path, int index)
+    public Branch() 
     {
-        if (index + 1 > path.Length)
-        {
-            return default;
-        }
-
-        var nextIndex = path.IndexOf(Delimiter, index + 1);
-
-        if (nextIndex < 0)
-        {
-            nextIndex = path.Length;
-        }
-
-        if (children.TryGetValue(path[index..nextIndex], out var child))
-        {
-            return child.Get(path, nextIndex + 1);
-        }
-
-        return default;
+        Children = children.AsReadOnly();
     }
 
-    protected (int Index, Node<T> Node) GetDeepestNode(string path, int index)
+    public Branch(Branch<T> parent, string segment) : this()
+    {
+        Delimiter = parent.Delimiter;
+        Segment = segment;
+
+        if (!string.IsNullOrWhiteSpace(parent.Path))
+        {
+            Path = parent.Path + Delimiter;
+        }
+
+        Path += Segment;
+        Parent = parent;
+
+        Strategy = parent.Strategy;
+    }
+
+    internal override T Get(string path, int index)
+    {
+        return Strategy.Get(path, index, Delimiter, children);
+    }
+
+    protected virtual (int Index, Node<T> Node) GetDeepestNode(string path, int index)
     {
         var nextIndex = path.IndexOf(Delimiter, index + 1);
 
@@ -55,22 +61,18 @@ public class Branch<T> : Node<T>
         var segment = path[index..nextIndex];
         var deepestNode = GetDeepestNode(path, index);
 
-        Add:
+    Add:
         if (deepestNode.Node == this)
         {
             if (nextIndex == path.Length) // We're making a leaf!
             {
-                children.Add(segment, new Leaf<T>(segment, path, value, this));
+                AddNodeUnsafe(new Leaf<T>(segment, path, value, this));
             }
             else
             {
-                var branch = new Branch<T>()
-                {
-                    Path = segment,
-                    Parent = this
-                };
+                var branch = new Branch<T>(this, segment);
 
-                children.Add(segment, branch);
+                AddNodeUnsafe(branch);
                 branch.Add(path, nextIndex + 1, value);
             }
         }
@@ -80,18 +82,37 @@ public class Branch<T> : Node<T>
             {
                 b.Add(path, nextIndex + 1, value);
             }
-            else if (deepestNode.Node is Leaf<T>) // Since it's a Leaf<T>, we need remove it since Branches can't have values (should I add that?)
+            else if (deepestNode.Node is Leaf<T> l) // Since it's a Leaf<T>, we need remove it since Branches can't have values (should I add that?)
             {
-                children.Remove(segment);
-                deepestNode.Node = this;
+                deepestNode.Node = Strategy.Transform(l, children);
 
                 goto Add; // Refactor this.
             }
         }
     }
 
-    protected void Remove(string path)
+    public void AddNodeUnsafe(Node<T> node)
     {
-        children.Remove(path);
+        children.Add(node.Segment, node);
+        node.Parent = this;
     }
+
+    protected Node<T> Remove(string path)
+    {
+        if (children.TryGetValue(path, out var node))
+        {
+            node.Parent = null;
+            children.Remove(path);
+
+            return node;
+        }
+
+        return null;
+    }
+
+    public char Delimiter { get; init; } = '.';
+
+    public BranchStrategy<T> Strategy { get; init; } = new BranchStrategy<T>.Grow();
+
+    public ReadOnlyDictionary<string, Node<T>> Children { get; }
 }

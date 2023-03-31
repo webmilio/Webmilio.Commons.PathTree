@@ -2,10 +2,15 @@
 
 public abstract class Node<T>
 {
-    protected const char Delimiter = '.';
-
     internal abstract T Get(string path, int pathIndex);
 
+    public override string ToString()
+    {
+        return $"{GetType().Name}: {Path}";
+    }
+
     public Branch<T> Parent { get; internal set; }
+
+    public string Segment { get; internal set; }
     public string Path { get; internal set; }
 }

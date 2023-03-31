@@ -12,6 +12,11 @@ public class Root<T> : Branch<T>
         Add(path, 0, value);
     }
 
+    public new void Remove(string path)
+    {
+        base.Remove(path);
+    }
+
     public T Get(string path)
     {
         return Get(path, 0);

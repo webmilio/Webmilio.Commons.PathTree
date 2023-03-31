@@ -16,7 +16,10 @@ public class Leaf<T> : Node<T>
         return Value;
     }
 
-    public T Value { get; private set; }
+    public override string ToString()
+    {
+        return $"{base.ToString()} -> {Value}";
+    }
 
-    public string Segment { get; private set; }
+    public T Value { get; private set; }
 }
