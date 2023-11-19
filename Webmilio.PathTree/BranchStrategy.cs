@@ -2,7 +2,7 @@
 using System;
 using System.Reflection;
 
-namespace Webmilio.Commons.PathTree;
+namespace Webmilio.PathTree;
 
 public abstract class BranchStrategy<T>
 {

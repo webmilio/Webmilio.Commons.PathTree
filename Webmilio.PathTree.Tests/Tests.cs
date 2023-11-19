@@ -1,4 +1,6 @@
-namespace Webmilio.Commons.PathTree.Tests;
+using Webmilio.PathTree;
+
+namespace Webmilio.PathTree.Tests;
 
 [TestClass]
 public class Tests
@@ -95,7 +97,6 @@ public class Tests
             Assert.AreEqual(item.Value.Expected, root.Get(item.Key));
         }
     }
-
 
     [TestMethod]
     public void MultiNamespaceGrow()

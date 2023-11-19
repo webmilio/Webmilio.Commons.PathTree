@@ -1,4 +1,4 @@
-﻿namespace Webmilio.Commons.PathTree;
+﻿namespace Webmilio.PathTree;
 
 public abstract class Node<T>
 {

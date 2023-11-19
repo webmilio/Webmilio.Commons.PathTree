@@ -1,12 +1,12 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace Webmilio.Commons.PathTree;
+namespace Webmilio.PathTree;
 
 public class Branch<T> : Node<T>
 {
     protected Dictionary<string, Node<T>> children = new(StringComparer.OrdinalIgnoreCase);
 
-    public Branch() 
+    public Branch()
     {
         Children = new ReadOnlyDictionary<string, Node<T>>(children);
     }
@@ -61,32 +61,37 @@ public class Branch<T> : Node<T>
         var segment = path[index..nextIndex];
         var deepestNode = GetDeepestNode(path, index);
 
-    Add:
-        if (deepestNode.Node == this)
+        bool loop = true;
+        while (loop == true)
         {
-            if (nextIndex == path.Length) // We're making a leaf!
+            loop = false;
+
+            if (deepestNode.Node == this)
             {
-                AddNodeUnsafe(new Leaf<T>(segment, path, value, this));
+                if (nextIndex == path.Length) // We're making a leaf!
+                {
+                    AddNodeUnsafe(new Leaf<T>(segment, path, value, this));
+                }
+                else
+                {
+                    var branch = new Branch<T>(this, segment);
+
+                    AddNodeUnsafe(branch);
+                    branch.Add(path, nextIndex + 1, value);
+                }
             }
             else
             {
-                var branch = new Branch<T>(this, segment);
+                if (deepestNode.Node is Branch<T> b)
+                {
+                    b.Add(path, nextIndex + 1, value);
+                }
+                else if (deepestNode.Node is Leaf<T> l) // Since it's a Leaf<T>, we need remove it since Branches can't have values (should I add that?)
+                {
+                    deepestNode.Node = Strategy.Transform(l, children);
 
-                AddNodeUnsafe(branch);
-                branch.Add(path, nextIndex + 1, value);
-            }
-        }
-        else
-        {
-            if (deepestNode.Node is Branch<T> b)
-            {
-                b.Add(path, nextIndex + 1, value);
-            }
-            else if (deepestNode.Node is Leaf<T> l) // Since it's a Leaf<T>, we need remove it since Branches can't have values (should I add that?)
-            {
-                deepestNode.Node = Strategy.Transform(l, children);
-
-                goto Add; // Refactor this.
+                    loop = true; // Refactor this.
+                }
             }
         }
     }

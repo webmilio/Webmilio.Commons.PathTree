@@ -1,5 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using Webmilio.Commons.PathTree;
+using Webmilio.PathTree;
 
 Console.WriteLine("Hello, World!");
 
@@ -22,7 +22,7 @@ var paths = new Dictionary<string, int>()
 
 foreach (var items in paths) root.Add(items.Key, items.Value);
 
-void Print<T>(Node<T> node)
+static void Print<T>(Node<T> node)
 {
     Console.Write(node.Path);
 
